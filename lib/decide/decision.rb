@@ -2,7 +2,7 @@
 
 require "timeout"
 
-module RubyDM
+module Decide
   # A named decision: a set of typed questions asked of an asker about a
   # state, reduced to a match/no-match verdict by a rule.
   class Decision

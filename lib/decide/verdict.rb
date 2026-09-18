@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module RubyDM
+module Decide
   # The outcome of asking a Decision about a state: whether it matched,
   # whether the asker failed (and if so whether it failed open), and the
   # answers that led to that outcome.

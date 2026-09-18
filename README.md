@@ -1,30 +1,28 @@
-# ruby_dm
+# decide
 
 A decision model answers typed questions about a piece of state: does this
 match, which choice fits, how severe is it, with calibrated probabilities
 attached. An app rarely wants those raw answers. It wants a decision: did
 this match a named policy, and if the model couldn't answer, did we fail
-open or closed, and why. `ruby_dm` is that layer.
+open or closed, and why. `decide` is that layer.
 
-`ruby_dm` is backend-agnostic. Any object that responds to
+`decide` is backend-agnostic. Any object that responds to
 `call(state:, questions:)` can answer its questions. The `ruby_decision_model`
 gem (Typesafe Jev via OpenRouter) is the first real answer source, wired in
 through an optional adapter.
 
-Note: "dm" here means decision maker, not DataMapper.
-
 ## Install
 
 ```ruby
-gem "ruby_dm"
+gem "decide"
 ```
 
 ## Usage
 
 ```ruby
-require "ruby_dm"
+require "decide"
 
-decision = RubyDM::Decision.new(
+decision = Decide::Decision.new(
   name: "deliver_large_payment_failure",
   asker: asker,
   floor: 0.5,
@@ -47,7 +45,7 @@ verdict[:team]
 verdict.to_h
 ```
 
-An asker signals failure by raising `RubyDM::AskFailed` (with an optional
+An asker signals failure by raising `Decide::AskFailed` (with an optional
 `code:`) or any `StandardError`. `Decision#decide` rescues it into a verdict
 rather than letting the exception propagate: `fail_mode: :open` treats an
 unanswerable decision as matched, `:closed` treats it as unmatched. Set
@@ -60,12 +58,12 @@ question's probability against `floor`.
 ## Testing with Stub
 
 ```ruby
-require "ruby_dm"
+require "decide"
 require "minitest/autorun"
 
-asker = RubyDM::Stub.new(matches: 0.9, injection: 0.1, team: "payments", severity: 3)
+asker = Decide::Stub.new(matches: 0.9, injection: 0.1, team: "payments", severity: 3)
 
-decision = RubyDM::Decision.new(name: "test", asker: asker) do
+decision = Decide::Decision.new(name: "test", asker: asker) do
   noul :matches, "match?"
 end
 
@@ -81,21 +79,21 @@ records every `{state:, questions:}` it received.
 
 ## Using with ruby_decision_model
 
-`ruby_dm` has zero runtime dependencies, so it never requires
+`decide` has zero runtime dependencies, so it never requires
 `ruby_decision_model` unless you ask for the adapter:
 
 ```ruby
-require "ruby_dm/askers/decision_model"
+require "decide/askers/decision_model"
 
-asker = RubyDM::Askers::DecisionModel.new(RubyDecisionModel::Client.new(api_key: ENV.fetch("OPENROUTER_API_KEY")))
+asker = Decide::Askers::DecisionModel.new(RubyDecisionModel::Client.new(api_key: ENV.fetch("OPENROUTER_API_KEY")))
 
-decision = RubyDM::Decision.new(name: "...", asker: asker) do
+decision = Decide::Decision.new(name: "...", asker: asker) do
   noul :matches, "..."
 end
 ```
 
 The adapter maps the client's response into the asker protocol and turns
-`RubyDecisionModel::Error` subclasses into `RubyDM::AskFailed`.
+`RubyDecisionModel::Error` subclasses into `Decide::AskFailed`.
 
 ## Status
 

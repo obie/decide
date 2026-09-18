@@ -1,4 +1,4 @@
 # frozen_string_literal: true
 
-require "ruby_dm"
+require "decide"
 require "minitest/autorun"

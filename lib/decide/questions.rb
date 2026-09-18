@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module RubyDM
+module Decide
   # Builds wire-compatible question hashes (string keys) for the three
   # question types a decision model understands: noul, choice, score.
   module Questions

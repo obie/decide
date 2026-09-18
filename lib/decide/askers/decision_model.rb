@@ -3,13 +3,13 @@
 begin
   require "ruby_decision_model"
 rescue LoadError
-  raise LoadError, "RubyDM::Askers::DecisionModel requires the ruby_decision_model gem. " \
+  raise LoadError, "Decide::Askers::DecisionModel requires the ruby_decision_model gem. " \
                     "Add it to your Gemfile: gem \"ruby_decision_model\""
 end
 
-module RubyDM
+module Decide
   module Askers
-    # Adapts a ruby_decision_model client to the RubyDM asker protocol.
+    # Adapts a ruby_decision_model client to the Decide asker protocol.
     class DecisionModel
       def initialize(client)
         @client = client
@@ -30,7 +30,7 @@ module RubyDM
           }.compact
         end
       rescue RubyDecisionModel::Error => e
-        raise RubyDM::AskFailed, e.message
+        raise Decide::AskFailed, e.message
       end
 
       private

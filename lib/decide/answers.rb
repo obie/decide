@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module RubyDM
+module Decide
   # Small value objects wrapping an asker's symbol-keyed answer hash.
   module Answers
     Noul = Struct.new(:noul, :type) do

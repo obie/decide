@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module RubyDM
+module Decide
   # Raised by an asker to signal it could not answer. Any other StandardError
   # raised by an asker is also treated as a failure by Decision#decide.
   class AskFailed < StandardError

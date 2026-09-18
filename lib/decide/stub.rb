@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module RubyDM
+module Decide
   # A test asker. Coerces simple Ruby values into answer hashes, or accepts
   # explicit answer hashes, keyed by question id.
   class Stub
@@ -20,7 +20,7 @@ module RubyDM
       questions.each_key.with_object({}) do |id, acc|
         key = id.to_sym
         value = @answers.fetch(key) do
-          raise ArgumentError, "RubyDM::Stub has no answer for #{id.inspect}"
+          raise ArgumentError, "Decide::Stub has no answer for #{id.inspect}"
         end
         acc[id] = coerce(value)
       end
@@ -39,7 +39,7 @@ module RubyDM
       when Integer
         { type: "score", score: value, confidence: 1.0, probabilities: {}, legend: {} }
       else
-        raise ArgumentError, "RubyDM::Stub cannot coerce #{value.class}"
+        raise ArgumentError, "Decide::Stub cannot coerce #{value.class}"
       end
     end
   end

@@ -18,7 +18,7 @@ class FakeDecisionModelClient
   end
 end
 
-require "ruby_dm/askers/decision_model"
+require "decide/askers/decision_model"
 
 class DecisionModelAskerTest < Minitest::Test
   def test_maps_successful_response_into_symbol_keyed_hashes
@@ -26,7 +26,7 @@ class DecisionModelAskerTest < Minitest::Test
     response = FakeResponse.new(answers: { "matches" => answer })
     client = FakeDecisionModelClient.new(response: response)
 
-    result = RubyDM::Askers::DecisionModel.new(client).call(state: {}, questions: {})
+    result = Decide::Askers::DecisionModel.new(client).call(state: {}, questions: {})
 
     assert_equal({ type: "noul", noul: 0.8 }, result["matches"])
   end
@@ -34,8 +34,8 @@ class DecisionModelAskerTest < Minitest::Test
   def test_reraises_client_errors_as_ask_failed
     client = FakeDecisionModelClient.new(error: RubyDecisionModel::Error.new("upstream failure"))
 
-    assert_raises(RubyDM::AskFailed) do
-      RubyDM::Askers::DecisionModel.new(client).call(state: {}, questions: {})
+    assert_raises(Decide::AskFailed) do
+      Decide::Askers::DecisionModel.new(client).call(state: {}, questions: {})
     end
   end
 end

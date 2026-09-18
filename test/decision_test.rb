@@ -4,8 +4,8 @@ require "test_helper"
 
 class DecisionTest < Minitest::Test
   def test_default_rule_uses_first_noul_and_floor
-    asker = RubyDM::Stub.new(matches: 0.9)
-    decision = RubyDM::Decision.new(name: "d", asker: asker, floor: 0.5) do
+    asker = Decide::Stub.new(matches: 0.9)
+    decision = Decide::Decision.new(name: "d", asker: asker, floor: 0.5) do
       noul :matches, "Does this match?"
     end
 
@@ -16,8 +16,8 @@ class DecisionTest < Minitest::Test
   end
 
   def test_default_rule_below_floor_does_not_match
-    asker = RubyDM::Stub.new(matches: 0.3)
-    decision = RubyDM::Decision.new(name: "d", asker: asker, floor: 0.5) do
+    asker = Decide::Stub.new(matches: 0.3)
+    decision = Decide::Decision.new(name: "d", asker: asker, floor: 0.5) do
       noul :matches, "Does this match?"
     end
 
@@ -25,8 +25,8 @@ class DecisionTest < Minitest::Test
   end
 
   def test_custom_rule
-    asker = RubyDM::Stub.new(matches: 0.9, injection: 0.9)
-    decision = RubyDM::Decision.new(name: "d", asker: asker, floor: 0.5) do
+    asker = Decide::Stub.new(matches: 0.9, injection: 0.9)
+    decision = Decide::Decision.new(name: "d", asker: asker, floor: 0.5) do
       noul :matches, "Does this match?"
       noul :injection, "Is this injection?"
       rule { |answers| answers[:matches].noul >= floor && answers[:injection].noul < 0.5 }
@@ -36,8 +36,8 @@ class DecisionTest < Minitest::Test
   end
 
   def test_rule_can_reference_floor_from_enclosing_decision
-    asker = RubyDM::Stub.new(matches: 0.6)
-    decision = RubyDM::Decision.new(name: "d", asker: asker, floor: 0.55) do
+    asker = Decide::Stub.new(matches: 0.6)
+    decision = Decide::Decision.new(name: "d", asker: asker, floor: 0.55) do
       noul :matches, "Does this match?"
       rule { |answers| answers[:matches].noul >= floor }
     end
@@ -47,7 +47,7 @@ class DecisionTest < Minitest::Test
 
   def test_requires_noul_or_rule
     assert_raises(ArgumentError) do
-      RubyDM::Decision.new(name: "d", asker: RubyDM::Stub.new) do
+      Decide::Decision.new(name: "d", asker: Decide::Stub.new) do
         choice :team, "team?", criteria: { "a" => "b" }
       end
     end
@@ -55,15 +55,15 @@ class DecisionTest < Minitest::Test
 
   def test_invalid_fail_mode_raises
     assert_raises(ArgumentError) do
-      RubyDM::Decision.new(name: "d", asker: RubyDM::Stub.new, fail_mode: :sideways) do
+      Decide::Decision.new(name: "d", asker: Decide::Stub.new, fail_mode: :sideways) do
         noul :matches, "match?"
       end
     end
   end
 
   def test_fail_mode_open_on_asker_exception
-    asker = RubyDM::Stub.new(raise: RuntimeError.new("boom"))
-    decision = RubyDM::Decision.new(name: "d", asker: asker, fail_mode: :open) do
+    asker = Decide::Stub.new(raise: RuntimeError.new("boom"))
+    decision = Decide::Decision.new(name: "d", asker: asker, fail_mode: :open) do
       noul :matches, "match?"
     end
 
@@ -75,8 +75,8 @@ class DecisionTest < Minitest::Test
   end
 
   def test_fail_mode_closed_on_asker_exception
-    asker = RubyDM::Stub.new(raise: RuntimeError.new("boom"))
-    decision = RubyDM::Decision.new(name: "d", asker: asker, fail_mode: :closed) do
+    asker = Decide::Stub.new(raise: RuntimeError.new("boom"))
+    decision = Decide::Decision.new(name: "d", asker: asker, fail_mode: :closed) do
       noul :matches, "match?"
     end
 
@@ -87,14 +87,14 @@ class DecisionTest < Minitest::Test
   end
 
   def test_ask_failed_is_treated_as_failure
-    asker = RubyDM::Stub.new(raise: RubyDM::AskFailed.new("nope", code: "timeout"))
-    decision = RubyDM::Decision.new(name: "d", asker: asker) do
+    asker = Decide::Stub.new(raise: Decide::AskFailed.new("nope", code: "timeout"))
+    decision = Decide::Decision.new(name: "d", asker: asker) do
       noul :matches, "match?"
     end
 
     verdict = decision.decide({})
     assert verdict.failed?
-    assert_kind_of RubyDM::AskFailed, verdict.error
+    assert_kind_of Decide::AskFailed, verdict.error
   end
 
   def test_timeout_expiry_is_a_failure
@@ -104,7 +104,7 @@ class DecisionTest < Minitest::Test
       { "matches" => { type: "noul", noul: 0.9 } }
     end
 
-    decision = RubyDM::Decision.new(name: "d", asker: slow_asker, timeout: 0.01, fail_mode: :closed) do
+    decision = Decide::Decision.new(name: "d", asker: slow_asker, timeout: 0.01, fail_mode: :closed) do
       noul :matches, "match?"
     end
 
@@ -114,23 +114,23 @@ class DecisionTest < Minitest::Test
   end
 
   def test_missing_answers_is_a_failure
-    asker = RubyDM::Stub.new
+    asker = Decide::Stub.new
     def asker.call(state:, questions:)
       {}
     end
 
-    decision = RubyDM::Decision.new(name: "d", asker: asker, fail_mode: :closed) do
+    decision = Decide::Decision.new(name: "d", asker: asker, fail_mode: :closed) do
       noul :matches, "match?"
     end
 
     verdict = decision.decide({})
     assert verdict.failed?
-    assert_kind_of RubyDM::MissingAnswers, verdict.error
+    assert_kind_of Decide::MissingAnswers, verdict.error
   end
 
   def test_to_h_shape
-    asker = RubyDM::Stub.new(matches: 0.9)
-    decision = RubyDM::Decision.new(name: :my_decision, asker: asker, floor: 0.5) do
+    asker = Decide::Stub.new(matches: 0.9)
+    decision = Decide::Decision.new(name: :my_decision, asker: asker, floor: 0.5) do
       noul :matches, "match?"
     end
 
@@ -146,8 +146,8 @@ class DecisionTest < Minitest::Test
   end
 
   def test_verdict_bracket_access
-    asker = RubyDM::Stub.new(matches: 0.9, team: "payments")
-    decision = RubyDM::Decision.new(name: "d", asker: asker) do
+    asker = Decide::Stub.new(matches: 0.9, team: "payments")
+    decision = Decide::Decision.new(name: "d", asker: asker) do
       noul :matches, "match?"
       choice :team, "team?", criteria: { "payments" => "money" }
     end
@@ -157,9 +157,9 @@ class DecisionTest < Minitest::Test
   end
 
   def test_full_dsl_example
-    asker = RubyDM::Stub.new(matches: 0.9, injection: 0.1, team: "payments", severity: 3)
+    asker = Decide::Stub.new(matches: 0.9, injection: 0.1, team: "payments", severity: 3)
 
-    decision = RubyDM::Decision.new(
+    decision = Decide::Decision.new(
       name: "deliver_large_payment_failure",
       asker: asker,
       floor: 0.5,
@@ -180,7 +180,7 @@ class DecisionTest < Minitest::Test
   end
 
   def test_rule_errors_are_not_swallowed_into_fail_open
-    decision = RubyDM::Decision.new(name: "buggy", asker: RubyDM::Stub.new(matches: 0.9)) do
+    decision = Decide::Decision.new(name: "buggy", asker: Decide::Stub.new(matches: 0.9)) do
       noul :matches, "Match?"
       rule { |_answers| raise "bug in rule" }
     end

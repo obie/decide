@@ -1,20 +1,20 @@
 # frozen_string_literal: true
 
-require_relative "lib/ruby_dm/version"
+require_relative "lib/decide/version"
 
 Gem::Specification.new do |spec|
-  spec.name        = "ruby_dm"
-  spec.version     = RubyDM::VERSION
+  spec.name        = "decide"
+  spec.version     = Decide::VERSION
   spec.authors     = ["Obie Fernandez"]
   spec.email       = ["obiefernandez@gmail.com"]
 
   spec.summary     = "Decision maker for Ruby: turn decision model answers into policy verdicts"
-  spec.description = "ruby_dm composes typed questions, match floors, and fail modes into named " \
+  spec.description = "decide composes typed questions, match floors, and fail modes into named " \
                       "decisions. Ask a decision about a state and get a verdict that knows " \
                       "whether it matched, whether it failed open, and why. Works with any " \
                       "answer source; the ruby_decision_model gem (Typesafe Jev via OpenRouter) " \
                       "is the first."
-  spec.homepage    = "https://github.com/obie/ruby_dm"
+  spec.homepage    = "https://github.com/obie/decide"
   spec.license     = "MIT"
   spec.required_ruby_version = ">= 3.2"
 
