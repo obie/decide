@@ -178,4 +178,15 @@ class DecisionTest < Minitest::Test
     assert_equal "payments", verdict[:team].choice
     assert_equal 3, verdict[:severity].score
   end
+
+  def test_rule_errors_are_not_swallowed_into_fail_open
+    decision = RubyDM::Decision.new(name: "buggy", asker: RubyDM::Stub.new(matches: 0.9)) do
+      noul :matches, "Match?"
+      rule { |_answers| raise "bug in rule" }
+    end
+
+    error = assert_raises(RuntimeError) { decision.decide({}) }
+    assert_equal "bug in rule", error.message
+  end
+
 end

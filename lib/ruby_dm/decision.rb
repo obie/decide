@@ -49,22 +49,21 @@ module RubyDM
     end
 
     def decide(state)
-      raw = call_asker(state)
-
-      answers = build_answers(raw)
-      matched = evaluate_rule(answers)
+      answers = begin
+        build_answers(call_asker(state))
+      rescue StandardError => e
+        return failed_verdict(e)
+      end
 
       Verdict.new(
         decision_name: name,
         floor: floor,
-        matched: matched,
+        matched: evaluate_rule(answers) ? true : false,
         fail_open: false,
         failed: false,
         probability: primary_probability(answers),
         answers: answers
       )
-    rescue StandardError => e
-      failed_verdict(e)
     end
 
     private
